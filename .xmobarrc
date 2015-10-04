@@ -1,0 +1,19 @@
+Config { font = "xft:Inconsolata:size=14:Medium"
+       , borderColor = "black"
+       , border = NoBorder
+       , bgColor = "#002330"
+       , fgColor = "#657b83"
+       , position = Top
+       , lowerOnStart = True
+       , persistent = False
+       , commands = [ Run Cpu ["-c","0","-p","3","-t","<total>","-L","3","-H","50","--normal","#859900","--high","#dc322f"] 10
+                    , Run Memory ["-c","0","-p","3","-t","<usedratio>"] 10
+                    , Run CoreTemp ["-c","0","-p","3","-t","<core0>","-L","3","-H","60","--normal","#859900","--high","#dc322f"] 10
+                    , Run Wireless "wlp0s20u3" ["-c","0","-p","3","-t","<quality>"] 100
+                    , Run StdinReader
+                    , Run Date "%H:%M" "date" 30
+                    ]
+       , sepChar = "%"
+       , alignSep = "}{"
+       , template = "%StdinReader% }{ | %cpu% %coretemp% %memory% %wlp0s20u3wi% <fc=#fdf6e3,#268bd2> %date% </fc>"
+       }
