@@ -37,7 +37,7 @@ values."
      ;; version-control
      clojure
      ;; colors
-     vim-powerline
+     php
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -197,9 +197,7 @@ user code."
  This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
   (global-linum-mode)
-  (require 'airline-themes)
   (setq powerline-default-separator nil)
-  (load-theme 'airline-solarized-gui)
   (set-face-attribute 'fringe nil :background "#073642")
   (set-face-attribute 'linum  nil :background "#073642")
 )
