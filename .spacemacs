@@ -200,6 +200,7 @@ layers configuration. You are free to put any user code."
   (setq powerline-default-separator nil)
   (set-face-attribute 'fringe nil :background "#073642")
   (set-face-attribute 'linum  nil :background "#073642")
+  (require 'clojure-mode)
   (define-clojure-indent
     (defrecord 1)
     (reify 0))
