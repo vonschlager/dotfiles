@@ -200,6 +200,9 @@ layers configuration. You are free to put any user code."
   (setq powerline-default-separator nil)
   (set-face-attribute 'fringe nil :background "#073642")
   (set-face-attribute 'linum  nil :background "#073642")
+  (define-clojure-indent
+    (defrecord 1)
+    (reify 0))
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
