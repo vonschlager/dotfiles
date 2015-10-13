@@ -33,8 +33,8 @@ values."
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
      ;; spell-checking
-     ;; syntax-checking
-     ;; version-control
+     syntax-checking
+     version-control
      clojure
      ;; colors
      php
@@ -197,13 +197,11 @@ user code."
  This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
   (global-linum-mode)
-  (setq powerline-default-separator nil)
-  (set-face-attribute 'fringe nil :background "#073642")
-  (set-face-attribute 'linum  nil :background "#073642")
-  (require 'clojure-mode)
-  (define-clojure-indent
-    (defrecord 1)
-    (reify 0))
+  (setq powerline-default-separator 'arrow)
+  (define-key smartparens-mode-map (kbd "C-<right>") 'sp-forward-slurp-sexp)
+  (define-key smartparens-mode-map (kbd "C-<left>") 'sp-forward-barf-sexp)
+  (define-key smartparens-mode-map (kbd "C-M-<left>") 'sp-backward-slurp-sexp)
+  (define-key smartparens-mode-map (kbd "C-M-<right>") 'sp-backward-barf-sexp)
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -213,9 +211,14 @@ layers configuration. You are free to put any user code."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
  '(custom-safe-themes
    (quote
-    ("133222702a3c75d16ea9c50743f66b987a7209fb8b964f2c0938a816a83379a0" default))))
+    ("133222702a3c75d16ea9c50743f66b987a7209fb8b964f2c0938a816a83379a0" default)))
+ '(solarized-distinct-fringe-background t)
+ '(solarized-emphasize-indicators t)
+ '(solarized-high-contrast-mode-line t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
