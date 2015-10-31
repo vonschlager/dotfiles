@@ -25,6 +25,7 @@ import Control.Applicative
 import Control.Monad
 import Control.Monad.Writer
 import Data.Maybe
+import Data.Traversable (traverse)
 import Graphics.X11.Xinerama
 import System.Exit
 import System.IO
