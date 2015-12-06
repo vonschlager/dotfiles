@@ -88,7 +88,6 @@ myFocusedBorderColor = "#dc322f"
 --
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
-    , ((modm,               xK_r     ), spawn "rox")
     , ((modm,               xK_o     ), spawn "chrome")
     , ((modm,               xK_e     ), spawn "emacs")
     , ((modm .|. shiftMask, xK_r     ), spawn "sudo systemctl suspend")
@@ -250,14 +249,18 @@ myPP = xmobarPP { ppTitle   = xmobarColor "#657b83" ""
                 , ppSep     = " | "
                 , ppLayout  = xmobarColor "#dc322f" "" .
                     (\x -> case x of
-                             "Tall"                 -> "T"
-                             "ResizableTall"        -> "RT"
-                             "Mirror Tall"          -> "MT"
-                             "Mirror ResizableTall" -> "MRT"
-                             "Full"                 -> "F"
-                             "Hinted Full"          -> "HF"
-                             "Tabbed Simplest"      -> "TS"
-                             _                      -> x
+                             "Tall"                        -> "T"
+                             "ResizableTall"               -> "T"
+                             "Tabbed ResizableTall"        -> "T"
+                             "Mirror Tall"                 -> "MT"
+                             "Mirror ResizableTall"        -> "MT"
+                             "Tabbed Mirror ResizableTall" -> "MT"
+                             "Full"                        -> "F"
+                             "Hinted Full"                 -> "HF"
+                             "Tabbed Full"                 -> "TF"
+                             "Tabbed Simplest"             -> "TS"
+                             "Tabbed Tabbed Simplest"      -> "TS"
+                             _                             -> x
                     )
                 , ppUrgent  = xmobarColor "#fdf6e3" "#dc322f" . pad
                 , ppCurrent = xmobarColor "#fdf6e3" "#268bd2" . pad
