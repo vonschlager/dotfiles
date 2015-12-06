@@ -10,6 +10,7 @@
 import XMonad
 import XMonad.Actions.CycleWS
 import XMonad.Actions.GridSelect
+import XMonad.Actions.WorkspaceNames
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
@@ -18,6 +19,10 @@ import XMonad.Hooks.UrgencyHook
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Tabbed
 import XMonad.Layout.ResizableTile
+import XMonad.Layout.TrackFloating
+import XMonad.Layout.SubLayouts
+import XMonad.Layout.WindowNavigation
+import qualified XMonad.Layout.BoringWindows as B
 import XMonad.Prompt
 import XMonad.Prompt.Shell
 import XMonad.StackSet hiding (focus, workspaces)
@@ -51,7 +56,7 @@ myClickJustFocuses = False
 -- Width of the window border in pixels.
 --
 myBorderWidth :: Dimension
-myBorderWidth = 2
+myBorderWidth = 1
 
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
@@ -89,13 +94,14 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask, xK_r     ), spawn "sudo systemctl suspend")
     , ((modm .|. shiftMask, xK_d     ), spawn "sudo systemctl hibernate")
     , ((modm,               xK_p     ), shellPrompt myXPConfig)
+    , ((modm .|. shiftMask, xK_p     ), renameWorkspace myXPConfig)
     , ((modm .|. shiftMask, xK_c     ), kill)
     , ((modm,               xK_space ), sendMessage NextLayout)
     , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
     , ((modm,               xK_n     ), refresh)
     , ((modm,               xK_Tab   ), toggleWS)
-    , ((modm,               xK_j     ), windows W.focusDown)
-    , ((modm,               xK_k     ), windows W.focusUp)
+    , ((modm,               xK_j     ), B.focusDown)
+    , ((modm,               xK_k     ), B.focusUp)
     , ((modm,               xK_m     ), windows W.focusMaster)
     , ((modm,               xK_Return), windows W.swapMaster)
     , ((modm .|. shiftMask, xK_j     ), windows W.swapDown)
@@ -105,8 +111,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm,               xK_t     ), withFocused $ windows . W.sink)
     , ((modm              , xK_comma ), sendMessage (IncMasterN 1))
     , ((modm              , xK_period), sendMessage (IncMasterN (-1)))
-    , ((modm .|. shiftMask, xK_h     ), moveTo Prev $ WSIs not9)
-    , ((modm .|. shiftMask, xK_l     ), moveTo Next $ WSIs not9)
+    , ((modm .|. shiftMask, xK_h     ), moveTo Prev NonEmptyWS)
+    , ((modm .|. shiftMask, xK_l     ), moveTo Next NonEmptyWS)
     , ((modm              , xK_b     ), sendMessage ToggleStruts)
     , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
     , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
@@ -114,39 +120,19 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm              , xK_a     ), sendMessage MirrorShrink)
     , ((modm              , xK_z     ), sendMessage MirrorExpand)
 
---    -- Switch between layers
---    , ((modm              , xK_space ), switchLayer)
---
---    -- Directional navigation of windows
---    , ((modm,                 xK_Right), windowGo R False)
---    , ((modm,                 xK_Left ), windowGo L False)
---    , ((modm,                 xK_Up   ), windowGo U False)
---    , ((modm,                 xK_Down ), windowGo D False)
---
---    -- Swap adjacent windows
---    , ((modm .|. controlMask, xK_Right), windowSwap R False)
---    , ((modm .|. controlMask, xK_Left ), windowSwap L False)
---    , ((modm .|. controlMask, xK_Up   ), windowSwap U False)
---    , ((modm .|. controlMask, xK_Down ), windowSwap D False)
---
---    -- Directional navigation of screens
---    , ((modm,                 xK_r    ), screenGo R False)
---    , ((modm,                 xK_l    ), screenGo L False)
---    , ((modm,                 xK_u    ), screenGo U False)
---    , ((modm,                 xK_d    ), screenGo D False)
---
---    -- Swap workspaces on adjacent screens
---    , ((modm .|. controlMask, xK_r    ), screenSwap R False)
---    , ((modm .|. controlMask, xK_l    ), screenSwap L False)
---    , ((modm .|. controlMask, xK_u    ), screenSwap U False)
---    , ((modm .|. controlMask, xK_d    ), screenSwap D False)
---
---    -- Send window to adjacent screen
---    , ((modm .|. mod1Mask,    xK_r    ), windowToScreen R False)
---    , ((modm .|. mod1Mask,    xK_l    ), windowToScreen L False)
---    , ((modm .|. mod1Mask,    xK_u    ), windowToScreen U False)
---    , ((modm .|. mod1Mask,    xK_d    ), windowToScreen D False)
+    , ((modm .|. controlMask, xK_h), sendMessage $ pullGroup L)
+    , ((modm .|. controlMask, xK_l), sendMessage $ pullGroup R)
+    , ((modm .|. controlMask, xK_k), sendMessage $ pullGroup U)
+    , ((modm .|. controlMask, xK_j), sendMessage $ pullGroup D)
+
+    , ((modm .|. controlMask, xK_m), withFocused (sendMessage . MergeAll))
+    , ((modm .|. controlMask, xK_u), withFocused (sendMessage . UnMerge))
+
+    , ((modm .|. controlMask, xK_period), onGroup W.focusUp')
+    , ((modm .|. controlMask, xK_comma), onGroup W.focusDown')
+    , ((modm .|. controlMask, xK_space), toSubl NextLayout)
     ]
+
     ++
 
     --
@@ -156,8 +142,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [((m .|. modm, k), windows $ f i)
         | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]
         , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
-  where
-    not9 = (return $ \s -> (isJust $ stack s) && (("9" /=) $ W.tag s)) :: X (WindowSpace -> Bool)
 
 ------------------------------------------------------------------------
 -- Mouse bindings: default actions bound to mouse events
@@ -188,7 +172,10 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 --
 myLayout = smartBorders
          . avoidStruts
-         $ tiled ||| tabbed shrinkText myTabConfig ||| Mirror tiled ||| Full
+         . windowNavigation
+         . subTabbed
+         . B.boringWindows
+         $ tiled ||| trackFloating (tabbed shrinkText myTabConfig) ||| Mirror tiled ||| Full
          -- $ tiled ||| Mirror tiled ||| Full
   where
      -- default tiling algorithm partitions the screen into two panes
@@ -259,8 +246,8 @@ main = xmonad . withUrgencyHook NoUrgencyHook
               -- . withNavigation2DConfig defaultNavigation2DConfig
               . defaults =<< mapM xmobarScreen =<< getScreens
 
-myPP = xmobarPP { ppTitle   = xmobarColor "#657b83" "" 
-                , ppSep     = " | " 
+myPP = xmobarPP { ppTitle   = xmobarColor "#657b83" ""
+                , ppSep     = " | "
                 , ppLayout  = xmobarColor "#dc322f" "" .
                     (\x -> case x of
                              "Tall"                 -> "T"
@@ -288,7 +275,7 @@ myXPConfig = defaultXPConfig
     , promptBorderWidth = 0
     }
 
-myTabConfig = defaultTheme 
+myTabConfig = defaultTheme
     { fontName            = "xft:Inconsolata:size=12:Medium"
     , activeColor         = "#002b36"
     , activeBorderColor   = "#dc322f"
@@ -350,7 +337,8 @@ multiPP' dynlStr focusPP unfocusPP handles = do
         pickPP ws = do
             let isFoc = (ws ==) . W.tag . W.workspace . W.current $ windowset state
             put state { windowset = W.view ws $ windowset state }
-            out <- lift $ dynlStr $ if isFoc then focusPP else unfocusPP
+            namedPP <- lift $ workspaceNamesPP $ if isFoc then focusPP else unfocusPP
+            out <- lift $ dynlStr namedPP
             when isFoc $ get >>= tell . Last . Just
             return out
     traverse put . getLast
