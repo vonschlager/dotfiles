@@ -2,8 +2,8 @@ URxvt.font: xft:Inconsolata:size=12:Medium
 URxvt.boldFont: xft:Inconsolata:size=12:Bold
 URxvt.italicFont: xft:Inconsolata:size=12:Italic
 URxvt.bolditalicFont: xft:Inconsolata:size=12:Bold:Italic
-URxvt*scrollstyle: plain
-URxvt*scrollBar: false
+URxvt.scrollstyle: plain
+URxvt.scrollBar: false
 URxvt.urgentOnBell: true
 URxvt.loginShell: true
 URxvt.iso14755: false

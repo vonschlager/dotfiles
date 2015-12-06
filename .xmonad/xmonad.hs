@@ -17,6 +17,7 @@ import XMonad.Hooks.SetWMName
 import XMonad.Hooks.UrgencyHook
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Tabbed
+import XMonad.Layout.ResizableTile
 import XMonad.Prompt
 import XMonad.Prompt.Shell
 import XMonad.StackSet hiding (focus, workspaces)
@@ -84,6 +85,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
     , ((modm,               xK_r     ), spawn "rox")
     , ((modm,               xK_o     ), spawn "chrome")
+    , ((modm,               xK_e     ), spawn "emacs")
     , ((modm .|. shiftMask, xK_r     ), spawn "sudo systemctl suspend")
     , ((modm .|. shiftMask, xK_d     ), spawn "sudo systemctl hibernate")
     , ((modm,               xK_p     ), shellPrompt myXPConfig)
@@ -109,7 +111,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
     , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
     , ((modm              , xK_BackSpace), focusUrgent)
-    , ((modm              , xK_g     ), gridselectWorkspace defaultGSConfig W.greedyView)
+    , ((modm              , xK_a     ), sendMessage MirrorShrink)
+    , ((modm              , xK_z     ), sendMessage MirrorExpand)
 
 --    -- Switch between layers
 --    , ((modm              , xK_space ), switchLayer)
@@ -185,11 +188,11 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 --
 myLayout = smartBorders
          . avoidStruts
-         $ tabbed shrinkText myTabConfig ||| tiled ||| Mirror tiled ||| Full
+         $ tiled ||| tabbed shrinkText myTabConfig ||| Mirror tiled ||| Full
          -- $ tiled ||| Mirror tiled ||| Full
   where
      -- default tiling algorithm partitions the screen into two panes
-     tiled   = Tall nmaster delta ratio
+     tiled   = ResizableTall nmaster delta ratio []
      -- The default number of windows in the master pane
      nmaster = 1
      -- Default proportion of screen occupied by master pane
@@ -260,12 +263,14 @@ myPP = xmobarPP { ppTitle   = xmobarColor "#657b83" ""
                 , ppSep     = " | " 
                 , ppLayout  = xmobarColor "#dc322f" "" .
                     (\x -> case x of
-                             "Tall"            -> "T"
-                             "Mirror Tall"     -> "M"
-                             "Full"            -> "F"
-                             "Hinted Full"     -> "HF"
-                             "Tabbed Simplest" -> "TS"
-                             _                 -> x
+                             "Tall"                 -> "T"
+                             "ResizableTall"        -> "RT"
+                             "Mirror Tall"          -> "MT"
+                             "Mirror ResizableTall" -> "MRT"
+                             "Full"                 -> "F"
+                             "Hinted Full"          -> "HF"
+                             "Tabbed Simplest"      -> "TS"
+                             _                      -> x
                     )
                 , ppUrgent  = xmobarColor "#fdf6e3" "#dc322f" . pad
                 , ppCurrent = xmobarColor "#fdf6e3" "#268bd2" . pad
@@ -330,14 +335,14 @@ defaults hs = defaultConfig {
 getScreens :: IO [Int]
 getScreens = openDisplay "" >>= liftA2 (<*) f closeDisplay
     where f = fmap (zipWith const [0..]) . getScreenInfo
- 
+
 multiPP :: PP -- ^ The PP to use if the screen is focused
         -> PP -- ^ The PP to use otherwise
         -> [Handle] -- ^ Handles for the status bars, in order of increasing X
                     -- screen number
         -> X ()
 multiPP = multiPP' dynamicLogString
- 
+
 multiPP' :: (PP -> X String) -> PP -> PP -> [Handle] -> X ()
 multiPP' dynlStr focusPP unfocusPP handles = do
     state <- get
@@ -352,7 +357,7 @@ multiPP' dynlStr focusPP unfocusPP handles = do
         =<< execWriterT . (io . zipWithM_ hPutStrLn handles <=< mapM pickPP) . catMaybes
         =<< mapM screenWorkspace (zipWith const [0..] handles)
     return ()
- 
+
 -- | Requires a recent addition to xmobar (>0.9.2), otherwise you have to use
 -- multiple configuration files, which gets messy
 xmobarScreen :: Int -> IO Handle
