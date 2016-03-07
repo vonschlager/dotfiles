@@ -99,8 +99,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
     , ((modm,               xK_n     ), refresh)
     , ((modm,               xK_Tab   ), toggleWS)
-    , ((modm,               xK_j     ), B.focusDown)
-    , ((modm,               xK_k     ), B.focusUp)
+    , ((modm,               xK_j     ), windows W.focusDown)
+    , ((modm,               xK_k     ), windows W.focusUp)
     , ((modm,               xK_m     ), windows W.focusMaster)
     , ((modm,               xK_Return), windows W.swapMaster)
     , ((modm .|. shiftMask, xK_j     ), windows W.swapDown)
@@ -112,24 +112,17 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm              , xK_period), sendMessage (IncMasterN (-1)))
     , ((modm .|. shiftMask, xK_h     ), moveTo Prev NonEmptyWS)
     , ((modm .|. shiftMask, xK_l     ), moveTo Next NonEmptyWS)
+    , ((modm .|. controlMask,               xK_h     ), nextScreen)
+    , ((modm .|. controlMask,               xK_l     ), prevScreen)
+    , ((modm .|. controlMask .|. shiftMask, xK_h     ), swapNextScreen)
+    , ((modm .|. controlMask .|. shiftMask, xK_l     ), swapPrevScreen)
     , ((modm              , xK_b     ), sendMessage ToggleStruts)
     , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
     , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
     , ((modm              , xK_BackSpace), focusUrgent)
     , ((modm              , xK_a     ), sendMessage MirrorShrink)
     , ((modm              , xK_z     ), sendMessage MirrorExpand)
-
-    , ((modm .|. controlMask, xK_h), sendMessage $ pullGroup L)
-    , ((modm .|. controlMask, xK_l), sendMessage $ pullGroup R)
-    , ((modm .|. controlMask, xK_k), sendMessage $ pullGroup U)
-    , ((modm .|. controlMask, xK_j), sendMessage $ pullGroup D)
-
-    , ((modm .|. controlMask, xK_m), withFocused (sendMessage . MergeAll))
-    , ((modm .|. controlMask, xK_u), withFocused (sendMessage . UnMerge))
-
-    , ((modm .|. controlMask, xK_period), onGroup W.focusUp')
-    , ((modm .|. controlMask, xK_comma), onGroup W.focusDown')
-    , ((modm .|. controlMask, xK_space), toSubl NextLayout)
+    , ((modm .|. shiftMask,                 xK_x     ), spawn "xscreensaver-command -lock")
     ]
 
     ++
@@ -171,9 +164,6 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 --
 myLayout = smartBorders
          . avoidStruts
-         . windowNavigation
-         . subTabbed
-         . B.boringWindows
          $ tiled ||| trackFloating (tabbed shrinkText myTabConfig) ||| Mirror tiled ||| Full
          -- $ tiled ||| Mirror tiled ||| Full
   where
@@ -205,6 +195,9 @@ myManageHook = composeAll
     [ className =? "MPlayer"          --> doFloat
     , resource  =? "desktop_window"   --> doIgnore
     , resource  =? "kdesktop"         --> doIgnore
+    , className =? "Pidgin"           --> doFloat
+    , resource  =? "Hangouts"         --> doFloat
+    , manageDocks
     ]
 
 ------------------------------------------------------------------------
