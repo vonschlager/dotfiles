@@ -29,16 +29,21 @@ values."
      git
      markdown
      org
+     ;;racket
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
      ;; spell-checking
+     ;;rust
      syntax-checking
      version-control
      clojure
-     haskell
+     ;;haskell
+     ocaml
+     python
      ;; colors
      php
+     gtags
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -214,9 +219,11 @@ layers configuration. You are free to put any user code."
  ;; If there is more than one, they won't work right.
  '(ansi-color-faces-vector
    [default default default italic underline success warning error])
+ '(clojure-defun-style-default-indent nil)
  '(custom-safe-themes
    (quote
     ("133222702a3c75d16ea9c50743f66b987a7209fb8b964f2c0938a816a83379a0" default)))
+ '(exec-path-from-shell-check-startup-files nil)
  '(solarized-distinct-fringe-background t)
  '(solarized-emphasize-indicators t)
  '(solarized-high-contrast-mode-line t))

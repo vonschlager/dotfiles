@@ -14,6 +14,7 @@ import XMonad.Actions.WorkspaceNames
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
 import XMonad.Hooks.UrgencyHook
 import XMonad.Layout.NoBorders
@@ -99,8 +100,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
     , ((modm,               xK_n     ), refresh)
     , ((modm,               xK_Tab   ), toggleWS)
-    , ((modm,               xK_j     ), B.focusDown)
-    , ((modm,               xK_k     ), B.focusUp)
+    , ((modm,               xK_j     ), windows W.focusDown)
+    , ((modm,               xK_k     ), windows W.focusUp)
     , ((modm,               xK_m     ), windows W.focusMaster)
     , ((modm,               xK_Return), windows W.swapMaster)
     , ((modm .|. shiftMask, xK_j     ), windows W.swapDown)
@@ -118,18 +119,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm              , xK_BackSpace), focusUrgent)
     , ((modm              , xK_a     ), sendMessage MirrorShrink)
     , ((modm              , xK_z     ), sendMessage MirrorExpand)
-
-    , ((modm .|. controlMask, xK_h), sendMessage $ pullGroup L)
-    , ((modm .|. controlMask, xK_l), sendMessage $ pullGroup R)
-    , ((modm .|. controlMask, xK_k), sendMessage $ pullGroup U)
-    , ((modm .|. controlMask, xK_j), sendMessage $ pullGroup D)
-
-    , ((modm .|. controlMask, xK_m), withFocused (sendMessage . MergeAll))
-    , ((modm .|. controlMask, xK_u), withFocused (sendMessage . UnMerge))
-
-    , ((modm .|. controlMask, xK_period), onGroup W.focusUp')
-    , ((modm .|. controlMask, xK_comma), onGroup W.focusDown')
-    , ((modm .|. controlMask, xK_space), toSubl NextLayout)
     ]
 
     ++
@@ -171,9 +160,6 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 --
 myLayout = smartBorders
          . avoidStruts
-         . windowNavigation
-         . subTabbed
-         . B.boringWindows
          $ tiled ||| trackFloating (tabbed shrinkText myTabConfig) ||| Mirror tiled ||| Full
          -- $ tiled ||| Mirror tiled ||| Full
   where
@@ -205,6 +191,7 @@ myManageHook = composeAll
     [ className =? "MPlayer"          --> doFloat
     , resource  =? "desktop_window"   --> doIgnore
     , resource  =? "kdesktop"         --> doIgnore
+    , isFullscreen                    --> doFullFloat
     ]
 
 ------------------------------------------------------------------------
