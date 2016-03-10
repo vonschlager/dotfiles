@@ -113,12 +113,17 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm              , xK_period), sendMessage (IncMasterN (-1)))
     , ((modm .|. shiftMask, xK_h     ), moveTo Prev NonEmptyWS)
     , ((modm .|. shiftMask, xK_l     ), moveTo Next NonEmptyWS)
+    , ((modm .|. controlMask,               xK_h     ), nextScreen)
+    , ((modm .|. controlMask,               xK_l     ), prevScreen)
+    , ((modm .|. controlMask .|. shiftMask, xK_h     ), swapNextScreen)
+    , ((modm .|. controlMask .|. shiftMask, xK_l     ), swapPrevScreen)
     , ((modm              , xK_b     ), sendMessage ToggleStruts)
     , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
     , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
     , ((modm              , xK_BackSpace), focusUrgent)
     , ((modm              , xK_a     ), sendMessage MirrorShrink)
     , ((modm              , xK_z     ), sendMessage MirrorExpand)
+    , ((modm .|. shiftMask,                 xK_x     ), spawn "xscreensaver-command -lock")
     ]
 
     ++
@@ -192,6 +197,7 @@ myManageHook = composeAll
     , resource  =? "desktop_window"   --> doIgnore
     , resource  =? "kdesktop"         --> doIgnore
     , isFullscreen                    --> doFullFloat
+    , manageDocks
     ]
 
 ------------------------------------------------------------------------
