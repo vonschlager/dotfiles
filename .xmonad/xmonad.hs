@@ -15,16 +15,16 @@ import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.SetWMName
 import XMonad.Hooks.UrgencyHook
-import XMonad.Layout.NoBorders
-import XMonad.Layout.Tabbed
-import XMonad.Layout.ResizableTile
-import XMonad.Layout.TrackFloating
-import XMonad.Layout.LayoutModifier
 import XMonad.Layout.Decoration
+import XMonad.Layout.NoBorders
+import XMonad.Layout.ResizableTile
 import XMonad.Layout.Simplest
+import XMonad.Layout.Tabbed
+import XMonad.Layout.TrackFloating
 import XMonad.Prompt
 import XMonad.Prompt.Shell
 import XMonad.Util.Run
+
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Writer
@@ -33,8 +33,8 @@ import Graphics.X11.Xinerama
 import System.Exit
 import System.IO
 
-import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
+import qualified XMonad.StackSet as W
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
