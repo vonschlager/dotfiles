@@ -39,7 +39,7 @@ values."
      version-control
      clojure
      purescript
-     ;;haskell
+     haskell
      ocaml
      python
      ;; colors
