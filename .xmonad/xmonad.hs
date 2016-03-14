@@ -165,20 +165,22 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout :: ModifiedLayout
-            AvoidStruts (ModifiedLayout
-                         (ConfigurableBorder Ambiguity)
-                         (Choose
-                          ResizableTall
-                          (Choose
-                           (ModifiedLayout
-                            TrackFloating
-                            (ModifiedLayout
-                             (XMonad.Layout.Decoration.Decoration
-                              TabbedDecoration DefaultShrinker)
-                             Simplest))
-                           (Choose (Mirror ResizableTall) Full))))
-            Window
+myLayout ::
+  ModifiedLayout
+  AvoidStruts
+  (ModifiedLayout
+   (ConfigurableBorder Ambiguity)
+   (Choose
+    ResizableTall
+    (Choose
+     (ModifiedLayout
+      TrackFloating
+      (ModifiedLayout
+       (XMonad.Layout.Decoration.Decoration
+        TabbedDecoration DefaultShrinker)
+       Simplest))
+     (Choose (Mirror ResizableTall) Full))))
+  Window
 myLayout =
   avoidStruts $
   lessBorders Screen $
@@ -314,6 +316,18 @@ myTabConfig = defaultTheme
 --
 -- No need to modify this.
 --
+defaults ::
+  [Handle] ->
+  XConfig
+  (ModifiedLayout
+   AvoidStruts
+   (ModifiedLayout
+    (ConfigurableBorder Ambiguity)
+    (Choose ResizableTall
+     (Choose (ModifiedLayout TrackFloating
+              (ModifiedLayout
+               (Decoration TabbedDecoration DefaultShrinker) Simplest))
+      (Choose (Mirror ResizableTall) Full)))))
 defaults hs = defaultConfig {
     -- simple stuff
         terminal           = myTerminal,
