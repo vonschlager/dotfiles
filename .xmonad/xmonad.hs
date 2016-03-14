@@ -9,30 +9,26 @@
 
 import XMonad
 import XMonad.Actions.CycleWS
-import XMonad.Actions.GridSelect
 import XMonad.Actions.WorkspaceNames
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
-import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
 import XMonad.Hooks.UrgencyHook
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Tabbed
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.TrackFloating
-import XMonad.Layout.SubLayouts
-import XMonad.Layout.WindowNavigation
-import qualified XMonad.Layout.BoringWindows as B
+import XMonad.Layout.LayoutModifier
+import XMonad.Layout.Decoration
+import XMonad.Layout.Simplest
 import XMonad.Prompt
 import XMonad.Prompt.Shell
-import XMonad.StackSet hiding (focus, workspaces)
 import XMonad.Util.Run
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Writer
 import Data.Maybe
-import Data.Traversable (traverse)
 import Graphics.X11.Xinerama
 import System.Exit
 import System.IO
@@ -77,16 +73,19 @@ myModMask = mod4Mask
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
 myWorkspaces :: [String]
-myWorkspaces = map show [1 .. 9]
+myWorkspaces = map show [1 :: Int .. 9]
 
 -- Border colors for unfocused and focused windows, respectively.
 --
+myNormalBorderColor :: String
 myNormalBorderColor  = "#073642"
+myFocusedBorderColor :: String
 myFocusedBorderColor = "#dc322f"
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 --
+myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
     , ((modm,               xK_o     ), spawn "chrome")
@@ -118,7 +117,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. controlMask .|. shiftMask, xK_h     ), swapNextScreen)
     , ((modm .|. controlMask .|. shiftMask, xK_l     ), swapPrevScreen)
     , ((modm              , xK_b     ), sendMessage ToggleStruts)
-    , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
+    , ((modm .|. shiftMask, xK_q     ), io exitSuccess)
     , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
     , ((modm              , xK_BackSpace), focusUrgent)
     , ((modm              , xK_a     ), sendMessage MirrorShrink)
@@ -139,16 +138,19 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 ------------------------------------------------------------------------
 -- Mouse bindings: default actions bound to mouse events
 --
-myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
+myMouseBindings :: XConfig t -> M.Map (KeyMask, Button) (Window -> X ())
+myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList
 
     -- mod-button1, Set the window to floating mode and move by dragging
-    [ ((modm, button1), (\w -> focus w >> mouseMoveWindow w
-                                       >> windows W.shiftMaster))
+    [ ((modm, button1), \w -> focus w
+                              >> mouseMoveWindow w
+                              >> windows W.shiftMaster)
     -- mod-button2, Raise the window to the top of the stack
-    , ((modm, button2), (\w -> focus w >> windows W.shiftMaster))
+    , ((modm, button2), \w -> focus w >> windows W.shiftMaster)
     -- mod-button3, Set the window to floating mode and resize by dragging
-    , ((modm, button3), (\w -> focus w >> mouseResizeWindow w
-                                       >> windows W.shiftMaster))
+    , ((modm, button3), \w -> focus w
+                              >> mouseResizeWindow w
+                              >> windows W.shiftMaster)
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
 
@@ -163,10 +165,27 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = smartBorders
-         . avoidStruts
-         $ tiled ||| trackFloating (tabbed shrinkText myTabConfig) ||| Mirror tiled ||| Full
-         -- $ tiled ||| Mirror tiled ||| Full
+myLayout :: ModifiedLayout
+            AvoidStruts (ModifiedLayout
+                         (ConfigurableBorder Ambiguity)
+                         (Choose
+                          ResizableTall
+                          (Choose
+                           (ModifiedLayout
+                            TrackFloating
+                            (ModifiedLayout
+                             (XMonad.Layout.Decoration.Decoration
+                              TabbedDecoration DefaultShrinker)
+                             Simplest))
+                           (Choose (Mirror ResizableTall) Full))))
+            Window
+myLayout =
+  avoidStruts $
+  lessBorders Screen $
+  tiled |||
+  trackFloating (tabbed shrinkText myTabConfig) |||
+  Mirror tiled |||
+  Full
   where
      -- default tiling algorithm partitions the screen into two panes
      tiled   = ResizableTall nmaster delta ratio []
@@ -176,6 +195,7 @@ myLayout = smartBorders
      ratio   = 1/2
      -- Percent of screen to increment by when resizing panes
      delta   = 3/100
+
 
 ------------------------------------------------------------------------
 -- Window rules:
@@ -192,12 +212,9 @@ myLayout = smartBorders
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 --
+myManageHook :: Query (Endo WindowSet)
 myManageHook = composeAll
-    [ className =? "MPlayer"          --> doFloat
-    , resource  =? "desktop_window"   --> doIgnore
-    , resource  =? "kdesktop"         --> doIgnore
-    , isFullscreen                    --> doFullFloat
-    , manageDocks
+    [ className =? "MPlayer" --> doFloat
     ]
 
 ------------------------------------------------------------------------
@@ -209,6 +226,7 @@ myManageHook = composeAll
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
+myEventHook :: Event -> X All
 myEventHook = fullscreenEventHook <+> docksEventHook
 
 ------------------------------------------------------------------------
@@ -217,7 +235,8 @@ myEventHook = fullscreenEventHook <+> docksEventHook
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
-myLogHook hs = multiPP myPP myPP { ppTitle = const "" } hs
+myLogHook :: [Handle] -> X ()
+myLogHook = multiPP myPP myPP { ppTitle = const "" }
 
 ------------------------------------------------------------------------
 -- Startup hook
@@ -227,6 +246,7 @@ myLogHook hs = multiPP myPP myPP { ppTitle = const "" } hs
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
+myStartupHook :: X ()
 myStartupHook = setWMName "LG3D"
 
 ------------------------------------------------------------------------
@@ -234,10 +254,12 @@ myStartupHook = setWMName "LG3D"
 
 -- Run xmonad with the settings you specify. No need to modify this.
 --
+main :: IO ()
 main = xmonad . withUrgencyHook NoUrgencyHook
               -- . withNavigation2DConfig defaultNavigation2DConfig
               . defaults =<< mapM xmobarScreen =<< getScreens
 
+myPP :: PP
 myPP = xmobarPP { ppTitle   = xmobarColor "#657b83" ""
                 , ppSep     = " | "
                 , ppLayout  = xmobarColor "#dc322f" "" .
@@ -260,6 +282,7 @@ myPP = xmobarPP { ppTitle   = xmobarColor "#657b83" ""
                 , ppVisible = xmobarColor "#fdf6e3" "#586e75" . pad
                 }
 
+myXPConfig :: XPConfig
 myXPConfig = defaultXPConfig
     { font     = "xft:Inconsolata:size=14:Medium"
     , position = Top
@@ -271,6 +294,7 @@ myXPConfig = defaultXPConfig
     , promptBorderWidth = 0
     }
 
+myTabConfig :: Theme
 myTabConfig = defaultTheme
     { fontName            = "xft:Inconsolata:size=12:Medium"
     , activeColor         = "#002b36"
@@ -328,16 +352,16 @@ multiPP = multiPP' dynamicLogString
 
 multiPP' :: (PP -> X String) -> PP -> PP -> [Handle] -> X ()
 multiPP' dynlStr focusPP unfocusPP handles = do
-    state <- get
+    _state <- get
     let pickPP :: WorkspaceId -> WriterT (Last XState) X String
         pickPP ws = do
-            let isFoc = (ws ==) . W.tag . W.workspace . W.current $ windowset state
-            put state { windowset = W.view ws $ windowset state }
+            let isFoc = (ws ==) . W.tag . W.workspace . W.current $ windowset _state
+            put _state { windowset = W.view ws $ windowset _state }
             namedPP <- lift $ workspaceNamesPP $ if isFoc then focusPP else unfocusPP
             out <- lift $ dynlStr namedPP
             when isFoc $ get >>= tell . Last . Just
             return out
-    traverse put . getLast
+    _ <- traverse put . getLast
         =<< execWriterT . (io . zipWithM_ hPutStrLn handles <=< mapM pickPP) . catMaybes
         =<< mapM screenWorkspace (zipWith const [0..] handles)
     return ()

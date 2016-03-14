@@ -38,7 +38,7 @@ values."
      syntax-checking
      version-control
      clojure
-     ;;haskell
+     haskell
      ocaml
      python
      ;; colors
