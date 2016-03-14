@@ -38,6 +38,7 @@ values."
      syntax-checking
      version-control
      clojure
+     purescript
      ;;haskell
      ocaml
      python
