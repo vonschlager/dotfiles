@@ -52,7 +52,7 @@ alias bower='noglob bower'
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git archlinux lein docker docker-compose)
+plugins=(git archlinux lein docker docker-compose history-substring-search)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -60,6 +60,12 @@ source $ZSH/oh-my-zsh.sh
 
 bindkey -v
 bindkey "^?" backward-delete-char
+
+bindkey "$terminfo[kcuu1]" history-substring-search-up
+bindkey "$terminfo[kcud1]" history-substring-search-down
+
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
 
 export PATH="/home/jacek/.bin:/home/jacek/.cabal/bin:./.cabal-sandbox/bin:/opt/ghc783/bin:/home/jacek/.bin:/home/jacek/.cabal/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
 export PATH=$PATH:"/home/jacek/elm/Elm-Platform/0.16/.cabal-sandbox/bin"
