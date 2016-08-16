@@ -1,0 +1,20 @@
+command=/usr/lib/i3blocks/$BLOCK_NAME
+separator_block_width=15
+markup=none
+separator=false
+
+[memory]
+label=MEM
+separator=false
+interval=30
+
+[cpu_usage]
+label=CPU
+interval=10
+min_width=CPU: 100.00%
+
+[time]
+command=date '+ %H:%M '
+interval=30
+color=#fdf6e3
+background=#268bd2

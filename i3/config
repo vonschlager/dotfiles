@@ -84,11 +84,11 @@ bindsym $mod+r mode "resize"
 set $S_base03 #002b36
 
 bar {
-    status_command i3status
+    status_command i3blocks
     mode dock
     hidden_state show
     modifier $mod
-    position top
+    position bottom
     colors {
         background #002330
         statusline #657b83
