@@ -108,7 +108,7 @@ Xft.rgba: rgb
 *color15:               S_base3
 
 rofi.color-enabled: true
-rofi.color-window: S_base03, S_base03, #003642
+rofi.color-window: S_base03, S_base00, #003642
 rofi.color-normal: S_base03, S_base0, #003643, #008ed4, #ffffff
 rofi.color-active: S_base03, #008ed4, #003643, #008ed4, #66c6ff
 rofi.color-urgent: S_base03, #da4281, #003643, #008ed4, #890661
