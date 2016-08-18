@@ -9,11 +9,12 @@
 #xinput disable `xinput | grep TouchPad | cut -f 2 | cut -b 4-`
 sleep 1
 sed -i "s/\([^#{]\+[ \t]\+pcm \"hw:\)./\1`aplay -l | grep USB | cut -d : -f 1 | cut -d ' ' -f 2`/" .asoundrc
+setxkbmap -layout pl
 xrdb -merge ~/.Xresources
 xrandr --output DVI-D-0 --output HDMI-1 --primary --right-of DVI-D-0
 xsetroot -cursor_name left_ptr
 #xsetroot -solid "#fdf6e3"
 xsetroot -solid "#002b36"
 xscreensaver -no-splash&
-#exec xmonad
-exec i3
+exec xmonad
+#exec i3
