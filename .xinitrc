@@ -11,10 +11,11 @@ sleep 1
 sed -i "s/\([^#{]\+[ \t]\+pcm \"hw:\)./\1`aplay -l | grep USB | cut -d : -f 1 | cut -d ' ' -f 2`/" .asoundrc
 setxkbmap -layout pl
 xrdb -merge ~/.Xresources
-xrandr --output DVI-D-0 --output HDMI-1 --primary --right-of DVI-D-0
+xrandr --output DVI-D-0 --output HDMI-0 --primary --right-of DVI-D-0
 xsetroot -cursor_name left_ptr
 #xsetroot -solid "#fdf6e3"
 xsetroot -solid "#002b36"
 xscreensaver -no-splash&
+# fix na znikające menu w chromie itd
+xprop -root -remove _NET_WORKAREA
 exec xmonad
-#exec i3
