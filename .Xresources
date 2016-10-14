@@ -1,7 +1,8 @@
-URxvt.font: xft:Inconsolata:size=12:Regular
-URxvt.boldFont: xft:Inconsolata:size=12:Bold
-URxvt.italicFont: xft:Inconsolata:size=12:Italic
-URxvt.bolditalicFont: xft:Inconsolata:size=12:Bold:Italic
+#define termfont xft:Source Code Pro:size=10
+URxvt.font: termfont
+URxvt.boldFont: termfont
+URxvt.italicFont: termfont
+URxvt.bolditalicFont: termfont
 URxvt.scrollstyle: plain
 URxvt.scrollBar: false
 URxvt.urgentOnBell: true
@@ -27,7 +28,7 @@ Xpdf*matteColor: black
 Xft.antialias:  1
 Xft.autohint: 0
 Xft.hinting: 1
-Xft.hintstyle: hintslight
+Xft.hintstyle: hintfull
 Xft.lcdfilter: lcddefault
 Xft.rgba: rgb
 
