@@ -1,7 +1,8 @@
-URxvt.font: xft:Inconsolata:size=12:Regular
-URxvt.boldFont: xft:Inconsolata:size=12:Bold
-URxvt.italicFont: xft:Inconsolata:size=12:Italic
-URxvt.bolditalicFont: xft:Inconsolata:size=12:Bold:Italic
+#define termfont xft:Source Code Pro:size=10
+URxvt.font: termfont
+URxvt.boldFont: termfont
+URxvt.italicFont: termfont
+URxvt.bolditalicFont: termfont
 URxvt.scrollstyle: plain
 URxvt.scrollBar: false
 URxvt.urgentOnBell: true
@@ -10,6 +11,7 @@ URxvt.iso14755: false
 URxvt.iso14755_52: false
 URxvt.transparent: false
 URxvt.depth: 32
+URxvt.letterSpace: -1
 
 URxvt.perl-ext-common: default,clipboard,url-select,keyboard-select
 URxvt.url-select.launcher: chrome
@@ -27,7 +29,7 @@ Xpdf*matteColor: black
 Xft.antialias:  1
 Xft.autohint: 0
 Xft.hinting: 1
-Xft.hintstyle: hintslight
+Xft.hintstyle: hintfull
 Xft.lcdfilter: lcddefault
 Xft.rgba: rgb
 
@@ -107,6 +109,7 @@ Xft.rgba: rgb
 *color7:                S_base2
 *color15:               S_base3
 
+rofi.font: Source Code Pro 10
 rofi.color-enabled: true
 rofi.color-window: S_base03, S_base00, #003642
 rofi.color-normal: S_base03, S_base0, #003643, #008ed4, #ffffff
