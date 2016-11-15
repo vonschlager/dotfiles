@@ -10,6 +10,7 @@
 import XMonad
 import XMonad.Actions.CycleWS
 import XMonad.Actions.WorkspaceNames
+import XMonad.Actions.UpdatePointer
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
@@ -21,9 +22,7 @@ import XMonad.Layout.ResizableTile
 import XMonad.Layout.Simplest
 import XMonad.Layout.Tabbed
 import XMonad.Layout.TrackFloating
-import XMonad.Prompt
-import XMonad.Prompt.Shell
-import XMonad.Util.Run
+import XMonad.Util.Run (spawnPipe)
 
 import Control.Applicative
 import Control.Monad
@@ -88,12 +87,12 @@ myFocusedBorderColor = "#dc322f"
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
-    , ((modm,               xK_o     ), spawn "chrome")
+    , ((modm,               xK_o     ), spawn "chromium")
     , ((modm,               xK_e     ), spawn "emacs")
     , ((modm .|. shiftMask, xK_r     ), spawn "sudo systemctl suspend")
     , ((modm .|. shiftMask, xK_d     ), spawn "sudo systemctl hibernate")
-    , ((modm,               xK_p     ), shellPrompt myXPConfig)
-    , ((modm .|. shiftMask, xK_p     ), renameWorkspace myXPConfig)
+    , ((modm,               xK_p     ), spawn "rofi -show run")
+    , ((modm,               xK_w     ), spawn "rofi -show window")
     , ((modm .|. shiftMask, xK_c     ), kill)
     , ((modm,               xK_space ), sendMessage NextLayout)
     , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
@@ -216,7 +215,7 @@ myLayout =
 --
 myManageHook :: Query (Endo WindowSet)
 myManageHook = composeAll
-    [ className =? "MPlayer" --> doFloat
+    [ className =? "mpv" --> doFloat
     ]
 
 ------------------------------------------------------------------------
@@ -238,7 +237,8 @@ myEventHook = fullscreenEventHook <+> docksEventHook
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
 myLogHook :: [Handle] -> X ()
-myLogHook = multiPP myPP myPP { ppTitle = const "" }
+myLogHook h = updatePointer (0.5, 0.5) (0, 0)
+    >> multiPP myPP myPP { ppTitle = const "" } h
 
 ------------------------------------------------------------------------
 -- Startup hook
@@ -258,7 +258,7 @@ myStartupHook = setWMName "LG3D"
 --
 main :: IO ()
 main = xmonad . withUrgencyHook NoUrgencyHook
-              -- . withNavigation2DConfig defaultNavigation2DConfig
+              . ewmh
               . defaults =<< mapM xmobarScreen =<< getScreens
 
 myPP :: PP
@@ -284,21 +284,9 @@ myPP = xmobarPP { ppTitle   = xmobarColor "#657b83" ""
                 , ppVisible = xmobarColor "#fdf6e3" "#586e75" . pad
                 }
 
-myXPConfig :: XPConfig
-myXPConfig = defaultXPConfig
-    { font     = "xft:Inconsolata:size=14:Medium"
-    , position = Top
-    , bgColor  = "#002330"
-    , fgColor  = "#657b83"
-    , bgHLight = "#268bd2"
-    , fgHLight = "#fdf6e3"
-    , height   = 24
-    , promptBorderWidth = 0
-    }
-
 myTabConfig :: Theme
 myTabConfig = defaultTheme
-    { fontName            = "xft:Inconsolata:size=12:Medium"
+    { fontName            = "xft:Source Code Pro:size=10"
     , activeColor         = "#002b36"
     , activeBorderColor   = "#dc322f"
     , activeTextColor     = "#657b83"
@@ -371,7 +359,7 @@ multiPP' dynlStr focusPP unfocusPP handles = do
         pickPP ws = do
             let isFoc = (ws ==) . W.tag . W.workspace . W.current $ windowset _state
             put _state { windowset = W.view ws $ windowset _state }
-            namedPP <- lift $ workspaceNamesPP $ if isFoc then focusPP else unfocusPP
+            let namedPP = if isFoc then focusPP else unfocusPP
             out <- lift $ dynlStr namedPP
             when isFoc $ get >>= tell . Last . Just
             return out
